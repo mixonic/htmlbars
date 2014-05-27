@@ -20,6 +20,7 @@ prototype.compile = function(opcodes) {
   this.parents.length = 1;
   this.declarations.length = 0;
   this.parentCount = 0;
+  this.domHelper = 'dom0';
 
   processOpcodes(this, opcodes);
 
@@ -70,12 +71,14 @@ prototype.helper = function(name, size, escaped, morphNum) {
   var prepared = prepareHelper(this.stack, size);
   prepared.options.push('escaped:'+escaped);
   prepared.options.push('data:(typeof options !== "undefined" && options.data)');
+  prepared.options.push('dom:'+this.domHelper);
   this.pushMustacheInContent(string(name), prepared.args, prepared.options, morphNum);
 };
 
 prototype.component = function(tag, morphNum) {
   var prepared = prepareHelper(this.stack, 0);
   prepared.options.push('data:(typeof options !== "undefined" && options.data)');
+  prepared.options.push('dom:'+this.domHelper);
   this.pushWebComponent(string(tag), prepared.options, morphNum);
 };
 
@@ -148,6 +151,10 @@ prototype.popParent = function() {
 
 prototype.getParent = function() {
   return this.parents[this.parents.length-1];
+};
+
+prototype.selectDOMHelper = function(domHelper) {
+  this.domHelper = domHelper;
 };
 
 export { HydrationCompiler };
