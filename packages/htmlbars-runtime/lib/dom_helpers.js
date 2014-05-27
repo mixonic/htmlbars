@@ -1,7 +1,7 @@
 import { merge } from "./utils";
 
-export function domHelpers(extensions) {
-  var base = {
+export function domHelpers() {
+  return {
     appendText: function(element, text) {
       element.appendChild(document.createTextNode(text));
     },
@@ -30,6 +30,4 @@ export function domHelpers(extensions) {
       return element.cloneNode(true);
     }
   };
-
-  return extensions ? merge(extensions, base) : base;
 }
