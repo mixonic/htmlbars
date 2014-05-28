@@ -1,4 +1,4 @@
-import { domHelpers } from "./dom_helpers";
+import { domHelpers } from "./dom-helpers";
 import { Morph } from "./morph";
 
 export function hydrate(spec, options) {

@@ -1,7 +1,7 @@
 /*jshint evil:true*/
 import { preprocess } from "./parser";
 import { TemplateCompiler } from "./compiler/template";
-import { domHelpers } from "htmlbars-runtime/dom_helpers";
+import { domHelpers } from "htmlbars-runtime/dom-helpers";
 import { Morph } from "morph";
 
 export function compile(string, options) {

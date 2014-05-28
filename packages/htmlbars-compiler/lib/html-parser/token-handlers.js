@@ -11,7 +11,7 @@ var states = {
   "beforeAttributeName": "in-tag"
 };
 
-var voidTagNames = "area base br col command embed hr img input keygen link meta param source track wbr";
+var voidTagNames = "area base br col command embed hr img input keygen link meta param source track wbr circle rect stop";
 var voidMap = {};
 
 voidTagNames.split(" ").forEach(function(tagName) {

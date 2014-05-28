@@ -1,5 +1,3 @@
-import { merge } from "./utils";
-
 export function domHelpers() {
   return {
     appendText: function(element, text) {
@@ -12,6 +10,10 @@ export function domHelpers() {
 
     setAttribute: function(element, name, value) {
       element.setAttribute(name, value);
+    },
+
+    createElementNS: function(namespace, tagName) {
+      return document.createElementNS(namespace, tagName);
     },
 
     createElement: function(tagName) {

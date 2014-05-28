@@ -12,6 +12,9 @@ var dom = {
   createElement: function (name) {
     return document.createElement(name);
   },
+  createElementNS: function (namespace, name) {
+    return document.createElementNS(namespace, name);
+  },
   appendText: function (node, string) {
     node.appendChild(document.createTextNode(string));
   },

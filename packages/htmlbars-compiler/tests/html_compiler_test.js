@@ -80,6 +80,20 @@ test("Simple elements can have attributes", function() {
   equalHTML(fragment, '<div class="foo" id="bar">content</div>');
 });
 
+test("Simple elements can have arbitrary attributes", function() {
+  var template = compile("<div data-some-data='foo' data-isCamelCase='bar'>content</div>");
+  var fragment = template();
+
+  equalHTML(fragment, '<div data-some-data="foo" data-iscamelcase="bar">content</div>');
+});
+
+test("SVG element can have capitalized attributes", function() {
+  var template = compile("<svg viewBox=\"0 0 0 0\"></svg>");
+  var fragment = template();
+
+  equalHTML(fragment, '<svg viewBox=\"0 0 0 0\"></svg>');
+});
+
 function shouldBeVoid(tagName) {
   var html = "<" + tagName + " data-foo='bar'><p>hello</p>";
   var template = compile(html);
@@ -98,7 +112,7 @@ function shouldBeVoid(tagName) {
 }
 
 test("Void elements are self-closing", function() {
-  var voidElements = "area base br col command embed hr img input keygen link meta param source track wbr";
+  var voidElements = "area base br col command embed hr img input keygen link meta param source track wbr circle rect stop";
 
   voidElements.split(" ").forEach(function(tagName) {
     shouldBeVoid(tagName);
@@ -115,6 +129,32 @@ test("The compiler can handle nesting", function() {
 
 test("The compiler can handle foreign elements", function() {
   var html = '<svg><path stroke="black" d="M 0 0 L 100 100"></path></svg>';
+  var template = compile(html);
+  var fragment = template();
+
+  equalHTML(fragment, html);
+});
+
+test("The compiler sets namespaces on foreign elements", function() {
+  var html = '<svg><path stroke="black" d="M 0 0 L 100 100"></path></svg>';
+  var template = compile(html);
+  var fragment = template();
+
+  equal(fragment.namespaceURI, "http://www.w3.org/2000/svg", "creates the svg element with a namespace");
+  equalHTML(fragment, html);
+});
+
+test("The compiler sets namespaces on nested foreign elements", function() {
+  var html = '<svg><path stroke="black" d="M 0 0 L 100 100"></path></svg>';
+  var template = compile(html);
+  var fragment = template();
+
+  equal(fragment.childNodes[0].namespaceURI, "http://www.w3.org/2000/svg", "creates the path element with a namespace");
+  equalHTML(fragment, html);
+});
+
+test("The compiler preserves capitalization of tags", function() {
+  var html = '<svg><linearGradient id="gradient"></linearGradient></svg>';
   var template = compile(html);
   var fragment = template();
 
