@@ -1,8 +1,6 @@
 import { processOpcodes } from "./utils";
 import { string } from "./quoting";
 
-var svgNamespace   = "http://www.w3.org/2000/svg";
-
 export function FragmentCompiler() {
   this.source = [];
   this.depth = 0;
@@ -21,7 +19,12 @@ FragmentCompiler.prototype.compile = function(opcodes) {
 };
 
 FragmentCompiler.prototype.contextualNamespace = function() {
-  return this.contextualNamespaces[this.contextualNamespaces.length-1];
+  var length = this.contextualNamespaces.length;
+  if (length > 0) {
+    return this.contextualNamespaces[length-1];
+  } else {
+    return null;
+  }
 };
 
 FragmentCompiler.prototype.empty = function() {
@@ -37,12 +40,6 @@ FragmentCompiler.prototype.endFragment = function() {
 };
 
 FragmentCompiler.prototype.openRootElement = function(tagName) {
-  if (tagName === 'svg') {
-    this.contextualNamespaces.push(svgNamespace);
-  } else {
-    this.contextualNamespaces.push(null);
-  }
-
   var functionCall,
       namespace = this.contextualNamespace();
 
@@ -58,7 +55,6 @@ FragmentCompiler.prototype.openRootElement = function(tagName) {
 };
 
 FragmentCompiler.prototype.closeRootElement = function() {
-  this.contextualNamespaces.pop();
   this.source.push('  return el0;\n');
 };
 
@@ -66,11 +62,15 @@ FragmentCompiler.prototype.rootText = function(str) {
   this.source.push('  return dom.createTextNode('+string(str)+');\n');
 };
 
-FragmentCompiler.prototype.openElement = function(tagName) {
-  if (tagName === 'svg') {
-    this.contextualNamespaces.push(svgNamespace);
-  }
+FragmentCompiler.prototype.openNamespace = function(namespace) {
+  this.contextualNamespaces.push(namespace);
+};
 
+FragmentCompiler.prototype.closeNamespace = function(namespace) {
+  this.contextualNamespaces.pop();
+};
+
+FragmentCompiler.prototype.openElement = function(tagName) {
   var functionCall,
       el = 'el'+(++this.depth),
       namespace = this.contextualNamespace();
@@ -96,10 +96,7 @@ FragmentCompiler.prototype.text = function(str) {
   this.source.push('  dom.appendText('+el+','+string(str)+');\n');
 };
 
-FragmentCompiler.prototype.closeElement = function(tagName) {
-  if (tagName === 'svg') {
-    this.contextualNamespaces.pop();
-  }
+FragmentCompiler.prototype.closeElement = function() {
   var child = 'el'+(this.depth--);
   var el = 'el'+this.depth;
   this.source.push('  dom.appendChild('+el+', '+child+');\n');
