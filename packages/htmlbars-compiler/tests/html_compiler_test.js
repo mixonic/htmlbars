@@ -620,21 +620,6 @@ test("A block helper can pass a context to be used in the child", function() {
   compilesTo('{{#testing}}<div id="test">{{title}}</div>{{/testing}}', '<div id="test">Rails is omakase</div>');
 });
 
-test("A block helper can insert the document fragment manually", function() {
-  var CONTENT = hooks.CONTENT;
-  hooks.CONTENT = function(morph, path, context, params, options) {
-    if (path === 'testing') {
-      options.helpers = hooks;
-      var frag = options.render({ title: 'Rails is omakase' }, options);
-      morph.update(frag);
-    } else {
-      CONTENT.apply(this, arguments);
-    }
-  };
-
-  compilesTo('{{#testing}}<div id="test">{{title}}</div>{{/testing}}', '<div id="test">Rails is omakase</div>');
-});
-
 test("Block helpers receive hash arguments", function() {
   hooks.CONTENT = function(morph, path, context, params, options) {
     if (options.hash.truth) {
