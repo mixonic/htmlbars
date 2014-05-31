@@ -20,10 +20,20 @@ FragmentOpcodeCompiler.prototype.text = function(text) {
   this.opcode('text', [text.chars]);
 };
 
+FragmentOpcodeCompiler.prototype.openNamespace = function(element) {
+  this.opcode('openNamespace', [element.namespace]);
+};
+
+FragmentOpcodeCompiler.prototype.openHTMLIntegrationPoint = function() {
+  this.opcode('openHTMLIntegrationPoint');
+};
+
+// Closes both namespaces and HTML integration points
+FragmentOpcodeCompiler.prototype.closeNamespace = function() {
+  this.opcode('closeNamespace');
+};
+
 FragmentOpcodeCompiler.prototype.openElement = function(element) {
-  if (element.tag === 'svg') {
-    this.opcode('openNamespace', [svgNamespace]);
-  }
   this.opcode('openElement', [element.tag]);
 
   element.attributes.forEach(function(attribute) {
@@ -33,9 +43,6 @@ FragmentOpcodeCompiler.prototype.openElement = function(element) {
 
 FragmentOpcodeCompiler.prototype.closeElement = function(element) {
   this.opcode('closeElement', [element.tag]);
-  if (element.tag === 'svg') {
-    this.opcode('closeNamespace', [svgNamespace]);
-  }
 };
 
 FragmentOpcodeCompiler.prototype.startTemplate = function(program) {

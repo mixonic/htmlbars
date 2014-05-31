@@ -44,7 +44,19 @@ Frame.prototype.next = function() {
       }
     } else if (node.type === 'element') {
       if (this.childElementFrame) {
+        if (node.isHTMLIntegrationPoint) {
+          this.block.stack.push(['openHTMLIntegrationPoint', node, this.pos, this.length]);
+        }
         this.block.stack.push(['openElement', node, this.pos, this.length, this.childElementFrame.mustacheCount]);
+        // Clumsy: is this the first node with a different namespace than
+        // its parent?
+        if ( this.program && node.namespace &&
+             ( this.program.type !== 'element' ||
+               ( this.program.type === 'element' && this.program.namespace !== node.namespace )
+             )
+           ) {
+          this.block.stack.push(['openNamespace', node, this.pos, this.length]);
+        }
         if (this.childElementFrame.mustacheCount) {
           // We only increment once vs add the mustache count because a child
           // element with multiple nodes is just a single consumer.
@@ -52,7 +64,19 @@ Frame.prototype.next = function() {
         }
         this.childElementFrame = null;
       } else {
+        // Clumsy: is this the first node with a different namespace than
+        // its parent?
+        if ( this.program && node.namespace &&
+             ( this.program.type !== 'element' ||
+               ( this.program.type === 'element' && this.program.namespace !== node.namespace )
+             )
+           ) {
+          this.block.stack.push(['closeNamespace', node, this.pos, this.length]);
+        }
         this.block.stack.push(['closeElement', node, this.pos, this.length]);
+        if (node.isHTMLIntegrationPoint) {
+          this.block.stack.push(['closeHTMLIntegrationPoint', node, this.pos, this.length]);
+        }
         this.childElementFrame = new Frame(node, this, false);
         this.childElementFrame.mustacheCount = node.helpers.length;
         return this.childElementFrame;

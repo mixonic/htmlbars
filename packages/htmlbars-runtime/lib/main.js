@@ -1,6 +1,6 @@
-import { domHelpers } from "./dom-helpers";
+import { DOMHelper } from "./dom-helper";
 import { Morph } from "./morph";
 
 export function hydrate(spec, options) {
-  return spec(domHelpers(), Morph);
+  return spec(new DOMHelper(document), Morph);
 }

@@ -1,11 +1,11 @@
 /*jshint evil:true*/
 import { preprocess } from "./parser";
 import { TemplateCompiler } from "./compiler/template";
-import { domHelpers } from "htmlbars-runtime/dom-helpers";
+import { DOMHelper } from "htmlbars-runtime/dom-helper";
 import { Morph } from "morph";
 
 export function compile(string, options) {
-  return compileSpec(string, options)(domHelpers(), Morph);
+  return compileSpec(string, options)(new DOMHelper(document), Morph);
 }
 
 export function compileSpec(string, options) {

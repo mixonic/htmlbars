@@ -65,6 +65,15 @@ HydrationOpcodeCompiler.prototype.closeElement = function(element) {
   this.currentDOMChildIndex = this.paths.pop();
 };
 
+HydrationOpcodeCompiler.prototype.openNamespace = HydrationOpcodeCompiler.prototype.openHTMLIntegrationPoint = function() {
+  this.opcode('openDOMHelper');
+};
+
+// Closes both namespaces and HTML integration points
+HydrationOpcodeCompiler.prototype.closeNamespace = function() {
+  this.opcode('closeDOMHelper');
+};
+
 HydrationOpcodeCompiler.prototype.node = function (node, childIndex, childrenLength) {
   this[node.type](node, childIndex, childrenLength);
 };

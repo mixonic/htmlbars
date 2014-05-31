@@ -54,10 +54,11 @@ TemplateCompiler.prototype.endTemplate = function(program) {
       fragmentProgram +
     'var cachedFragment = null;\n' +
     'return function template(context, options) {\n' +
+    '  var dom0 = options && options.dom || dom;\n' +
     '  if (cachedFragment === null) {\n' +
-    '    cachedFragment = build(dom);\n' +
+    '    cachedFragment = build(dom0);\n' +
     '  }\n' +
-    '  var fragment = dom.cloneNode(cachedFragment);\n' +
+    '  var fragment = dom0.cloneNode(cachedFragment);\n' +
     '  var helpers = options && options.helpers || {};\n' +
        hydrationProgram +
     '  return fragment;\n' +
@@ -75,6 +76,26 @@ TemplateCompiler.prototype.openElement = function(element, i, l, c) {
 TemplateCompiler.prototype.closeElement = function(element, i, l) {
   this.fragmentOpcodeCompiler.closeElement(element, i, l);
   this.hydrationOpcodeCompiler.closeElement(element, i, l);
+};
+
+TemplateCompiler.prototype.openNamespace = function(element, i, l, c) {
+  this.fragmentOpcodeCompiler.openNamespace(element, i, l, c);
+  this.hydrationOpcodeCompiler.openNamespace(element, i, l, c);
+};
+
+TemplateCompiler.prototype.closeNamespace = function(element, i, l) {
+  this.fragmentOpcodeCompiler.closeNamespace(element, i, l);
+  this.hydrationOpcodeCompiler.closeNamespace(element, i, l);
+};
+
+TemplateCompiler.prototype.openHTMLIntegrationPoint = function(element, i, l, c) {
+  this.fragmentOpcodeCompiler.openHTMLIntegrationPoint(element, i, l, c);
+  this.hydrationOpcodeCompiler.openHTMLIntegrationPoint(element, i, l, c);
+};
+
+TemplateCompiler.prototype.closeHTMLIntegrationPoint = function(element, i, l) {
+  this.fragmentOpcodeCompiler.closeNamespace(element, i, l);
+  this.hydrationOpcodeCompiler.closeNamespace(element, i, l);
 };
 
 TemplateCompiler.prototype.component = function(component, i, l) {

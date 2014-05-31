@@ -14,6 +14,8 @@ var states = {
 var voidTagNames = "area base br col command embed hr img input keygen link meta param source track wbr circle rect stop";
 var voidMap = {};
 
+var svgNamespace = "http://www.w3.org/2000/svg";
+
 voidTagNames.split(" ").forEach(function(tagName) {
   voidMap[tagName] = true;
 });
@@ -30,6 +32,19 @@ var tokenHandlers = {
 
   StartTag: function(tag) {
     var element = new ElementNode(tag.tagName, tag.attributes, tag.helpers || [], []);
+    var currentElement = this.currentElement();
+    // SVG is a namespace. Maybe MathML is another?
+    if (tag.tagName === 'svg') {
+      element.namespace = svgNamespace;
+    // There are additional tags for HTML besides foreignObject.
+    // see: http://www.whatwg.org/specs/web-apps/current-work/multipage/tree-construction.html
+    } else if (tag.tagName === 'foreignObject') {
+      element.isHTMLIntegrationPoint = true;
+    } else {
+      if (currentElement.type === 'element' && !currentElement.isHTMLIntegrationPoint) {
+        element.namespace = currentElement.namespace;
+      }
+    }
     this.elementStack.push(element);
     if (voidMap.hasOwnProperty(tag.tagName)) {
       tokenHandlers.EndTag.call(this, tag);

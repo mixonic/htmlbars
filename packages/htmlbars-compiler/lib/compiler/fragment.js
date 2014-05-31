@@ -4,35 +4,26 @@ import { string } from "./quoting";
 export function FragmentCompiler() {
   this.source = [];
   this.depth = 0;
-  this.contextualNamespaces = [];
 }
 
 FragmentCompiler.prototype.compile = function(opcodes) {
   this.source.length = 0;
   this.depth = 0;
+  this.domDepth = 0;
 
-  this.source.push('function build(dom) {\n');
+  this.source.push('function build(dom0) {\n');
   processOpcodes(this, opcodes);
   this.source.push('}\n');
 
   return this.source.join('');
 };
 
-FragmentCompiler.prototype.contextualNamespace = function() {
-  var length = this.contextualNamespaces.length;
-  if (length > 0) {
-    return this.contextualNamespaces[length-1];
-  } else {
-    return null;
-  }
-};
-
 FragmentCompiler.prototype.empty = function() {
-  this.source.push('  return dom.createDocumentFragment();\n');
+  this.source.push('  return dom'+this.domDepth+'.createDocumentFragment();\n');
 };
 
 FragmentCompiler.prototype.startFragment = function() {
-  this.source.push('  var el0 = dom.createDocumentFragment();\n');
+  this.source.push('  var el0 = dom'+this.domDepth+'.createDocumentFragment();\n');
 };
 
 FragmentCompiler.prototype.endFragment = function() {
@@ -40,8 +31,7 @@ FragmentCompiler.prototype.endFragment = function() {
 };
 
 FragmentCompiler.prototype.openRootElement = function(tagName) {
-  var functionCall,
-      namespace = this.contextualNamespace();
+  var functionCall;
 
   if (namespace) {
     functionCall = 'createElementNS('+string(namespace)+', ';
@@ -49,7 +39,7 @@ FragmentCompiler.prototype.openRootElement = function(tagName) {
     functionCall = 'createElement(';
   }
 
-  this.source.push('  var el0 = dom.'+functionCall+
+  this.source.push('  var el0 = dom'+this.domDepth+'.'+functionCall+
     string(tagName)+
   ');\n');
 };
@@ -59,21 +49,29 @@ FragmentCompiler.prototype.closeRootElement = function() {
 };
 
 FragmentCompiler.prototype.rootText = function(str) {
-  this.source.push('  return dom.createTextNode('+string(str)+');\n');
+  this.source.push('  return dom'+this.domDepth+'.createTextNode('+string(str)+');\n');
 };
 
 FragmentCompiler.prototype.openNamespace = function(namespace) {
-  this.contextualNamespaces.push(namespace);
+  var previous = 'dom'+this.domDepth,
+           dom = 'dom'+(++this.domDepth);
+  this.source.push('  var '+dom+' = new '+previous+'.constructor('+previous+'.document, '+string(namespace)+');\n');
 };
 
-FragmentCompiler.prototype.closeNamespace = function(namespace) {
-  this.contextualNamespaces.pop();
+FragmentCompiler.prototype.openHTMLIntegrationPoint = function() {
+  var previous = 'dom'+this.domDepth,
+           dom = 'dom'+(++this.domDepth);
+  this.source.push('  var '+dom+' = new '+previous+'.constructor('+previous+'.document);\n');
+};
+
+// Closes both namespaces and HTML integration points
+FragmentCompiler.prototype.closeNamespace = function() {
+  --this.domDepth;
 };
 
 FragmentCompiler.prototype.openElement = function(tagName) {
   var functionCall,
-      el = 'el'+(++this.depth),
-      namespace = this.contextualNamespace();
+      el = 'el'+(++this.depth);
 
   if (namespace) {
     functionCall = 'createElementNS('+string(namespace)+', ';
@@ -81,23 +79,23 @@ FragmentCompiler.prototype.openElement = function(tagName) {
     functionCall = 'createElement(';
   }
 
-  this.source.push('  var '+el+' = dom.'+functionCall+
+  this.source.push('  var '+el+' = dom'+this.domDepth+'.'+functionCall+
     string(tagName)+
   ');\n');
 };
 
 FragmentCompiler.prototype.setAttribute = function(name, value) {
   var el = 'el'+this.depth;
-  this.source.push('  dom.setAttribute('+el+','+string(name)+','+string(value)+');\n');
+  this.source.push('  dom'+this.domDepth+'.setAttribute('+el+','+string(name)+','+string(value)+');\n');
 };
 
 FragmentCompiler.prototype.text = function(str) {
   var el = 'el'+this.depth;
-  this.source.push('  dom.appendText('+el+','+string(str)+');\n');
+  this.source.push('  dom'+this.domDepth+'.appendText('+el+','+string(str)+');\n');
 };
 
 FragmentCompiler.prototype.closeElement = function() {
   var child = 'el'+(this.depth--);
   var el = 'el'+this.depth;
-  this.source.push('  dom.appendChild('+el+', '+child+');\n');
+  this.source.push('  dom'+this.domDepth+'.appendChild('+el+', '+child+');\n');
 };
