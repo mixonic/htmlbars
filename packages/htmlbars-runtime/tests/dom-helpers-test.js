@@ -7,7 +7,7 @@ var dom,
 
 module('htmlbars-runtime: DOM Helper',{
   setup: function(){
-    dom = new DOMHelper(document);
+    dom = new DOMHelper(null, document);
   }
 });
 
@@ -32,7 +32,7 @@ test('#setAttribute', function(){
 
 module('htmlbars-runtime: DOM Helper with namespace',{
   setup: function(){
-    dom = new DOMHelper(document, svgNamespace);
+    dom = new DOMHelper(null, document, svgNamespace);
   }
 });
 

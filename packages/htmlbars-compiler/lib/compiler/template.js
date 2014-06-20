@@ -37,7 +37,7 @@ TemplateCompiler.prototype.startProgram = function(program, childTemplateCount) 
   this.domHelperVariables.splice(0, this.domHelperVariables.length, 'dom0');
   // The source is the variable definitions
   this.domHelperSources.splice( 0, this.domHelperSources.length,
-                                'dom0 = envDom || dom' );
+                                'dom0 = env.dom' );
 
   this.childTemplates.length = 0;
   while(childTemplateCount--) {
@@ -76,18 +76,20 @@ TemplateCompiler.prototype.endProgram = function(program) {
       fragmentProgram +
     'var cachedFragment;\n' +
     'return function template(context, env) {\n' +
-    '  var envDom = env.dom;\n' +
-    '  if (dom0 === undefined || (envDom && dom0 !== envDom)) {\n' +
+    '  if (dom0 === undefined || (env.dom && dom0 !== env.dom)) {\n' +
+    // Unsure if we should keep this exception?
+    '    if (!env.dom) { throw new Error("You must pass dom to a template") }\n' +
          domHelperSource +
     '    cachedFragment = build();\n' +
     '  }\n' +
-    '  var fragment = dom0.cloneNode(cachedFragment);\n' +
+    '  var fragment = dom0.cloneNode(cachedFragment, true);\n' +
     '  var hooks = env.hooks;\n' +
        hydrationProgram +
     '  return fragment;\n' +
     '};\n' +
     '}())';
 
+  console.log(template);
   this.templates.push(template);
 };
 
@@ -116,7 +118,7 @@ TemplateCompiler.prototype.openDOMHelper = function(element) {
 
   this.domHelperSources.push(
     domHelper + ' = ' +
-    'new ' + previousHelper + '.constructor(' + domHelperArgs + ')'
+    'new ' + previousHelper + '.constructor(null, ' + domHelperArgs + ')'
   );
 
   this.fragmentOpcodeCompiler.selectDOMHelper(domHelper);

@@ -5,7 +5,7 @@ import { DOMHelper } from "htmlbars-runtime/dom-helper";
 
 module("TemplateCompiler");
 
-var dom = new DOMHelper(document);
+var dom = new DOMHelper(null, document);
 
 var hooks = {
   content: function(morph, helperName, context, params, options, helpers) {
@@ -25,10 +25,14 @@ test("it works", function testFunction() {
   var ast = preprocess('<div>{{#if working}}Hello {{firstName}} {{lastName}}!{{/if}}</div>');
   var compiler = new TemplateCompiler();
   var program = compiler.compile(ast);
-  var template = new Function("dom", "return " + program)(dom);
+  var template = new Function("return " + program)();
+  var env = {
+    hooks: hooks,
+    dom: dom
+  };
   var frag = template(
     { working: true, firstName: 'Kris', lastName: 'Selden' },
-    { hooks: hooks }
+    env
   );
   equalHTML(frag, '<div>Hello Kris Selden!</div>');
 });

@@ -18,9 +18,12 @@ import { Morph } from "morph";
  * @param {HTMLDocument} _document The document DOM methods are proxied to
  * @param {String} namespace The optional namespace for these actions
  */
-export function DOMHelper(_document, namespace){
-  this.document = _document;
-  this.namespace = namespace;
+export function DOMHelper(contextualElement, _document, namespaceURI){
+  this.document = _document || (
+    contextualElement ? contextualElement.ownerDocument : document);
+  this.namespaceURI = namespaceURI || (
+    contextualElement ? contextualElement.namespaceURI : null );
+  this.contextualElement = contextualElement;
 }
 
 var prototype = DOMHelper.prototype;
@@ -39,8 +42,8 @@ prototype.setAttribute = function(element, name, value) {
 };
 
 prototype.createElement = function(tagName) {
-  if (this.namespace) {
-    return this.document.createElementNS(this.namespace, tagName);
+  if (this.namespaceURI) {
+    return this.document.createElementNS(this.namespaceURI, tagName);
   } else {
     return this.document.createElement(tagName);
   }
@@ -54,8 +57,8 @@ prototype.createTextNode = function(text){
   return this.document.createTextNode(text);
 };
 
-prototype.cloneNode = function(element){
-  return element.cloneNode(true);
+prototype.cloneNode = function(element, deep){
+  return element.cloneNode(!!deep);
 };
 
 prototype.createMorph = function(parent, startIndex, endIndex){
@@ -67,13 +70,19 @@ prototype.createMorph = function(parent, startIndex, endIndex){
 
 prototype.parseHTML = function(html, parent){
   var element;
-  // nodeType 11 is a document fragment
+  // nodeType 11 is a document fragment. This will only
+  // occur at the root of a template, and thus we can trust
+  // that the contextualElement on the dom-helper is
+  // the correct parent node.
   if (parent.nodeType === 11) {
-    /* TODO require templates always have a contextual element
-       instead of element0 = frag */
-    element = this.createElement('div');
+    if (this.contextualElement){
+      element = this.cloneNode(this.contextualElement, false);
+    } else {
+      // Perhaps this should just throw?
+      element = this.createElement('div');
+    }
   } else {
-    element = parent.cloneNode(false);
+    element = this.cloneNode(parent, false);
   }
   element.innerHTML = html;
   return element.childNodes;

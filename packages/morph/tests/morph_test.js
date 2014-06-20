@@ -370,7 +370,7 @@ var contents = [
   }
 ];
 
-var domHelper = new DOMHelper(document);
+var domHelper = new DOMHelper(null, document);
 
 function iterateCombinations(parents, starts, ends, contents, callback) {
   function buildFactory(parentFactory, startFactory, endFactory, contentFactory) {

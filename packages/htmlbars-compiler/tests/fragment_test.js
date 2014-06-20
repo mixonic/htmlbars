@@ -6,7 +6,7 @@ import { DOMHelper } from "htmlbars-runtime/dom-helper";
 import { preprocess } from "htmlbars-compiler/parser";
 import { equalHTML } from "test/support/assertions";
 
-var dom = new DOMHelper(document);
+var dom = new DOMHelper(null, document);
 
 function fragmentFor(ast) {
   /* jshint evil: true */
@@ -100,7 +100,7 @@ test('test auto insertion of text nodes for needed edges a fragment with morph m
   var hydrate = hydratorFor(ast);
 
   var morphs = [];
-  var fakeMorphDOM = new DOMHelper(document);
+  var fakeMorphDOM = new DOMHelper(null, document);
   fakeMorphDOM.createMorph = function(start, startIndex, endIndex){
     var morph = DOMHelper.prototype.createMorph.call(
       this, start, startIndex, endIndex);
