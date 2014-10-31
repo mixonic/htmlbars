@@ -143,9 +143,8 @@ if (needsShy) {
   };
 }
 
-
 var buildIESafeDOM;
-if (tagNamesRequiringInnerHTMLFix.length > 0 || movesWhitespace) {
+if (tagNamesRequiringInnerHTMLFix || movesWhitespace) {
   buildIESafeDOM = function buildIESafeDOM(html, contextualElement, dom) {
     // Make a list of the leading text on script nodes. Include
     // script tags without any whitespace for easier processing later.
@@ -210,17 +209,39 @@ if (tagNamesRequiringInnerHTMLFix.length > 0 || movesWhitespace) {
   buildIESafeDOM = buildDOM;
 }
 
+// generic cross browser fixes for building DOM
+//
+function buildSafeDOM(html, contextualElement, dom) {
+  var childNodes = buildIESafeDOM(html, contextualElement, dom);
+
+  if (contextualElement.tagName === 'SELECT') {
+    // enumerate childNodes and mark the first
+    // option unselected
+    for (var i = 0; childNodes[i]; i++) {
+      var selectedAttribute  = childNodes[i].getAttribute('selected');
+      var resetSelectedIndex = selectedAttribute === null;
+
+      if (childNodes[i].tagName === 'OPTION' && resetSelectedIndex) {
+        childNodes[i].parentNode.selectedIndex = -1;
+        break;
+      }
+    }
+  }
+
+  return childNodes;
+}
+
 var buildHTMLDOM;
 if (needsIntegrationPointFix) {
   buildHTMLDOM = function buildHTMLDOM(html, contextualElement, dom){
     if (svgHTMLIntegrationPoints[contextualElement.tagName]) {
-      return buildIESafeDOM(html, document.createElement('div'), dom);
+      return buildSafeDOM(html, document.createElement('div'), dom);
     } else {
-      return buildIESafeDOM(html, contextualElement, dom);
+      return buildSafeDOM(html, contextualElement, dom);
     }
   };
 } else {
-  buildHTMLDOM = buildIESafeDOM;
+  buildHTMLDOM = buildSafeDOM;
 }
 
 export {buildHTMLDOM};

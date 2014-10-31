@@ -132,6 +132,46 @@ test('#parseHTML of script then tr inside table context wraps the tr in a tbody'
   equal(nodes[1].tagName, 'TBODY');
 });
 
+test('#parseHTML of select then second option stays selected (separate fragments)', function(){
+  var divElement            = document.createElement('div');
+  divElement.setAttribute('id', 'div1');
+  var selectElement         = dom.parseHTML('<select><option value="1"></option></select>', divElement)[0];
+  var optionElement         = dom.parseHTML('<option value="2"></option>', selectElement)[0];
+  var selectedOptionElement = dom.parseHTML('<option value="3" selected></option>', selectElement)[0];
+
+  ok(selectElement.childNodes[0].selected, 'first element is selected');
+  ok(!optionElement.selected, 'option is not selected');
+  ok(selectedOptionElement.selected, 'option is selected');
+
+  selectElement.appendChild(selectedOptionElement);
+
+  // wtf?
+  // selectElement.selectedIndex;
+
+  ok(!selectElement.childNodes[0].selected, 'first element is not selected');
+  ok(selectElement.childNodes[1].selected, 'second element is selected');
+
+  selectElement.appendChild(optionElement);
+
+  ok(!selectElement.childNodes[0].selected, 'first element is still not selected');
+  ok(selectElement.childNodes[1].selected, 'second element is still selected');
+  ok(!selectElement.childNodes[2].selected, 'third element is not selected');
+});
+
+test('#parseHTML of select then first option stays selected', function(){
+  var divElement    = document.createElement('div');
+  var selectElement = dom.parseHTML('<select><option></option></select>', divElement)[0];
+  var optionElement = dom.parseHTML('<option></option>', selectElement)[0];
+
+  ok(selectElement.childNodes[0].selected, 'first element is selected');
+  ok(!optionElement.selected, 'option is not selected');
+
+  selectElement.appendChild(optionElement);
+
+  ok(selectElement.childNodes[0].selected, 'first element is selected');
+  ok(!selectElement.childNodes[1].selected, 'second element is not selected');
+});
+
 test('#parseHTML of script then tr inside tbody context', function(){
   var tbodyElement = document.createElement('tbody'),
       nodes = dom.parseHTML('<script></script><tr><td>Yo</td></tr>', tbodyElement);
