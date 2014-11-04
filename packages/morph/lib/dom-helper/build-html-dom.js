@@ -209,20 +209,33 @@ if (tagNamesRequiringInnerHTMLFix || movesWhitespace) {
   buildIESafeDOM = buildDOM;
 }
 
-// generic cross browser fixes for building DOM
+// When parsing innerHTML, the browser may set up DOM with some things
+// not desired. For example, with a select element context and option
+// innerHTML the first option will be marked selected.
+//
+// This method cleans up some of that, resetting those values back to
+// their defaults.
 //
 function buildSafeDOM(html, contextualElement, dom) {
   var childNodes = buildIESafeDOM(html, contextualElement, dom);
 
   if (contextualElement.tagName === 'SELECT') {
-    // enumerate childNodes and mark the first
-    // option unselected
+    // Walk child nodes
     for (var i = 0; childNodes[i]; i++) {
-      var selectedAttribute  = childNodes[i].getAttribute('selected');
-      var resetSelectedIndex = selectedAttribute === null;
-
-      if (childNodes[i].tagName === 'OPTION' && resetSelectedIndex) {
-        childNodes[i].parentNode.selectedIndex = -1;
+      // Find and process the first option child node
+      if (childNodes[i].tagName === 'OPTION') {
+        var selectedAttribute = childNodes[i].getAttribute('selected');
+        if (
+          childNodes[i].parentNode.selectedIndex === 0 &&
+          (
+            selectedAttribute === null ||
+            ( selectedAttribute !== '' && selectedAttribute.toLowerCase() !== 'selected' )
+          )
+        ) {
+          // If the first node is selected but does not have an attribute,
+          // presume it is not really selected.
+          childNodes[i].parentNode.selectedIndex = -1;
+        }
         break;
       }
     }
