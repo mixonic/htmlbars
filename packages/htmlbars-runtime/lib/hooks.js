@@ -1021,6 +1021,10 @@ export function lookupHelper(env, scope, helperName) {
   return env.helpers[helperName];
 }
 
+export function lookupComponent(env, scope, helperName) {
+  return env.helpers[helperName];
+}
+
 export function bindScope(/* env, scope */) {
   // this function is used to handle host-specified extensions to scope
   // other than `self`, `locals` and `block`.
@@ -1058,6 +1062,7 @@ export default {
   createChildScope: createChildScope,
   hasHelper: hasHelper,
   lookupHelper: lookupHelper,
+  lookupComponent: lookupComponent,
   invokeHelper: invokeHelper,
   cleanupRenderNode: null,
   destroyRenderNode: null,

@@ -174,6 +174,14 @@ prototype.printBlockHook = function(templateId, inverseId, meta) {
   ]);
 };
 
+prototype.printAmbiguousContentHook = function(meta) {
+  var path = this.expressionStack.pop();
+  var params = this.expressionStack.pop();
+  var hash = this.expressionStack.pop();
+
+  this.statements.push([ 'ambiguousContent', path, params, hash, meta ]);
+};
+
 prototype.printInlineHook = function(meta) {
   var path = this.expressionStack.pop();
   var params = this.expressionStack.pop();

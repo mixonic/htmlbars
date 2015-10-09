@@ -100,6 +100,10 @@ let s = {
     return ['block', name, params, hash, template, inverse, sloc(...loc)];
   },
 
+  ambiguousContent(name, params=[], hash=[], loc=null) {
+    return [ 'ambiguousContent', name, params, hash, sloc(...loc) ];
+  },
+
   inline(name, params=[], hash=[], loc=null) {
     return [ 'inline', name, params, hash, sloc(...loc) ];
   },
@@ -283,6 +287,18 @@ testCompile("helper usage", "<div>{{foo 'bar' baz.bat true 3.14}}</div>", [
   [ "popParent", [] ]
 ], [
   s.inline('foo', [ 'bar', s.get('baz.bat', [17, 24]), true, 3.14 ], [], [5, 36])
+]);
+
+testCompile("ambiguous content usage", "{{foo.bar}}", [
+  [ "createMorph", [ 0, [], 0, 0, true ] ],
+  [ "openBoundary", [] ],
+  [ "closeBoundary", [] ],
+  ['prepareObject', [0] ],
+  ['prepareArray', [0] ],
+  [ "pushLiteral", [ "foo.bar" ] ],
+  [ "printAmbiguousContentHook", [ loc(0, 11) ] ]
+], [
+  s.ambiguousContent('foo.bar', [], [], [0, 11])
 ]);
 
 testCompile("node mustache", "<div {{foo}}></div>", [

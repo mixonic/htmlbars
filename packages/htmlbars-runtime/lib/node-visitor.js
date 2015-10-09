@@ -79,6 +79,30 @@ export let AlwaysDirtyVisitor = {
     env.hooks.range(morph, env, scope, path, params[0], visitor);
   },
 
+  ambiguousContent(node, morph, env, scope, visitor) {
+    let [, path] = node;
+
+    morph.isDirty = morph.isSubtreeDirty = false;
+
+    if (env.hooks.lookupComponent(env, scope, path)) {
+      env.hooks.inline(morph, env, scope, path, [], {}, visitor);
+      if (morph.linkedResult) {
+        linkParams(env, scope, morph, '@content-helper', [morph.linkedResult], null);
+      }
+      return;
+    }
+
+    let params;
+    if (morph.linkedParams) {
+      params = morph.linkedParams.params;
+    } else {
+      params = [env.hooks.get(env, scope, path)];
+    }
+
+    linkParams(env, scope, morph, '@range', params, null);
+    env.hooks.range(morph, env, scope, path, params[0], visitor);
+  },
+
   element(node, morph, env, scope, visitor) {
     let [, path, params, hash] = node;
     let paramsAndHash = linkParamsAndHash(env, scope, morph, path, params, hash);
@@ -131,6 +155,12 @@ export default {
   content(node, morph, env, scope, visitor) {
     dirtyCheck(env, morph, visitor, visitor => {
       AlwaysDirtyVisitor.content(node, morph, env, scope, visitor);
+    });
+  },
+
+  ambiguousContent(node, morph, env, scope, visitor) {
+    dirtyCheck(env, morph, visitor, visitor => {
+      AlwaysDirtyVisitor.ambiguousContent(node, morph, env, scope, visitor);
     });
   },
 

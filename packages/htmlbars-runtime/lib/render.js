@@ -249,6 +249,7 @@ RenderResult.prototype.populateNodes = function(visitor) {
 
     switch (statement[0]) {
       case 'block': visitor.block(statement, morph, env, scope, template, visitor); break;
+      case 'ambiguousContent': visitor.ambiguousContent(statement, morph, env, scope, visitor); break;
       case 'inline': visitor.inline(statement, morph, env, scope, visitor); break;
       case 'content': visitor.content(statement, morph, env, scope, visitor); break;
       case 'element': visitor.element(statement, morph, env, scope, template, visitor); break;

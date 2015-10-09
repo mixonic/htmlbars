@@ -2,7 +2,7 @@ import TemplateVisitor from "./template-visitor";
 import { processOpcodes } from "./utils";
 import { getAttrNamespace } from "../htmlbars-util";
 import { forEach } from "../htmlbars-util/array-utils";
-import { isHelper } from "../htmlbars-syntax/utils";
+import { isAmbiguousContent, isHelper } from "../htmlbars-syntax/utils";
 import { unwrapMustache } from "../htmlbars-syntax/utils";
 
 function detectIsElementChecked(element){
@@ -118,7 +118,12 @@ HydrationOpcodeCompiler.prototype.mustache = function(mustache, childIndex, chil
 
   var opcode;
 
-  if (isHelper(mustache)) {
+  if (isAmbiguousContent(mustache)) {
+    prepareHash(this, mustache.hash);
+    prepareParams(this, mustache.params);
+    preparePath(this, mustache.path);
+    opcode = 'printAmbiguousContentHook';
+  } else if (isHelper(mustache)) {
     prepareHash(this, mustache.hash);
     prepareParams(this, mustache.params);
     preparePath(this, mustache.path);

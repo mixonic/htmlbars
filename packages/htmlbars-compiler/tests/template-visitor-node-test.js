@@ -144,3 +144,21 @@ test("comment", function() {
     ['endProgram', [0]]
   ]);
 });
+
+test("helper", function() {
+  var input = "{{foo-bar fuz}}";
+  actionsEqual(input, [
+    ['startProgram', [0, []]],
+    ['mustache', [0, 1]],
+    ['endProgram', [0]]
+  ]);
+});
+
+test("ambiguous helper", function() {
+  var input = "{{foo.foo-bar fuz}}";
+  actionsEqual(input, [
+    ['startProgram', [0, []]],
+    ['mustache', [0, 1]],
+    ['endProgram', [0]]
+  ]);
+});

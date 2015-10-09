@@ -58,6 +58,10 @@ export function appendChild(parent, node) {
   childrenFor(parent).push(node);
 }
 
+export function isAmbiguousContent(mustache) {
+  return mustache.path.original.indexOf('.') !== -1;
+}
+
 export function isHelper(mustache) {
   return (mustache.params && mustache.params.length > 0) ||
     (mustache.hash && mustache.hash.pairs.length > 0);
